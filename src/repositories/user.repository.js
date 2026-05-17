@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const db = require('../config/db');
+const { runSqlRepository } = require('../../src/repositories/utils.repository');
 
 const insertSql = fs.readFileSync(
   path.join(__dirname, '../sql/users/register.inser.sql'),
@@ -60,11 +61,18 @@ const postUserInfoUpdate = (data, callback) => {
   db.query(
     sqlUserInfoUpdate,
     [
-      data.full_name, data.gender, data.height_cm, data.weight_kg, data.age, 
+      data.full_name, data.gender, data.height_cm, data.weight_kg, data.age,
       data.emergency_contact_name, data.emergency_contact_phone, data.id
     ],
     callback
   );
+};
+
+const getUserDeviceId = (data) => {
+  return runSqlRepository({
+    sqlDatabase: 'users/getUserDevice.sql',
+    data: [data.id]
+  });
 };
 
 module.exports = {
@@ -72,5 +80,6 @@ module.exports = {
   getLoginUser,
   getProfileInfo,
   getUserInfoEdit,
-  postUserInfoUpdate
+  postUserInfoUpdate,
+  getUserDeviceId
 };

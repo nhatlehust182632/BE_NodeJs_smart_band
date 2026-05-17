@@ -1,4 +1,6 @@
+const util = require('util');
 const userRepository = require('../repositories/user.repository');
+const getLoginUser = util.promisify(userRepository.getLoginUser);
 
 const saveRegister = (data, callback) => {
   userRepository.insertRegister(data, callback);

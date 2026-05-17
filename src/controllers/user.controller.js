@@ -43,6 +43,7 @@ const loginUser = (req, res) => {
   userService.loginUser(
     { id, password_hash },
     (err, result, fields) => {                // fields (ít dùng) là metadata (thông tin mô tả các cột) trong kết quả query
+
       if (err) {
         return res.status(500).json({
           success: false,
@@ -56,7 +57,7 @@ const loginUser = (req, res) => {
           message: 'Sai id hoặc mật khẩu',
         });
       }
-      
+
       res.status(200).json({
         success: true,
         message: 'Đăng nhập thành công',
@@ -64,6 +65,7 @@ const loginUser = (req, res) => {
       });
     }
   );
+  //getDeviceByUserId.select.sql
 };
 
 const getInfoUser = (req, res) => {
@@ -77,14 +79,14 @@ const getInfoUser = (req, res) => {
 
   userService.getProfileInfo(
     { id },
-    (err, result) => {              
+    (err, result) => {
       if (err) {
         return res.status(500).json({
           success: false,
           message: 'Dữ liệu người dùng thất bại' + err
         });
       }
-      
+
       res.status(200).json({
         success: true,
         message: 'Hồ sơ người dùng thành công',
@@ -105,14 +107,14 @@ const getInfoUserEdit = (req, res) => {
 
   userService.getUserInfoEdit(
     { id },
-    (err, result) => {              
+    (err, result) => {
       if (err) {
         return res.status(500).json({
           success: false,
           message: 'Dữ liệu người dùng thất bại' + err
         });
       }
-      
+
       res.status(200).json({
         success: true,
         message: 'Hồ sơ người dùng thành công',
@@ -133,14 +135,14 @@ const postInfoUpdate = (req, res) => {
 
   userService.getProfileInfoEdit(
     { ...req.body },
-    (err, result) => {              
+    (err, result) => {
       if (err) {
         return res.status(500).json({
           success: false,
           message: 'Dữ liệu người dùng thất bại' + err
         });
       }
-      
+
       res.status(200).json({
         success: true,
         message: 'Lưu thông tin người dùng thành công',

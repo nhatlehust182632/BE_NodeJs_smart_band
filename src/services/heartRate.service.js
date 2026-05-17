@@ -24,8 +24,17 @@ const getHeartRateHistoryService = async (data) => {
   return resultHeartRateByTimes;
 };
 
+const saveHeartRateDataService = async (data) => {
+  const resultHeartRateByTimes = await getHeartRateInfo.getHeartRateHistoryRepository(data);
+  if (!resultHeartRateByTimes || resultHeartRateByTimes.length === 0) {
+    return null;
+  }
+  return resultHeartRateByTimes;
+};
+
 module.exports = {
   getHeartRateInfoService,
   getHeartRateByTimeService,
-  getHeartRateHistoryService
+  getHeartRateHistoryService,
+  saveHeartRateDataService
 };
