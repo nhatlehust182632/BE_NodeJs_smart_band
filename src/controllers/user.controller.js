@@ -1,49 +1,90 @@
 const userService = require('../services/user.services');
+const userRepository = require('../repositories/user.repository');
+
+// Controller quản lý người dùng, tương tác với bảng `users` trong SQL.
+// Bảng `users` chứa các trường chính: id, email, phone, password_hash, full_name,
+// gender, date_of_birth, height_cm, weight_kg, emergency_phone,
+// enable_heart_rate_alert, status, created_at, updated_at.
 
 const creatUser = (req, res) => {
-  const { id, phone, full_name, password_hash } = req.body;
+  const { id, phone, full_name, password_hash, email } = req.body;
   if (!id || phone == null || full_name == null || password_hash == null) {
     return res.status(400).json({
       success: false,
-      message: 'Thieu du lieu',
+      message: 'Thiếu dữ liệu đăng ký',
       body: req.body
     });
   }
 
-  userService.saveRegister(
-    { id, phone, full_name, password_hash },
-    (err, result) => {
-      if (err) {
+  // Kiểm tra xem `phone` đã tồn tại trong bảng `users` chưa
+  userService.getUserByPhone(
+    { phone },
+    (errCheck, rowsCheck) => {
+      if (errCheck) {
         return res.status(500).json({
           success: false,
-          message: 'Luu du lieu that bai'
+          message: 'Lỗi kiểm tra số điện thoại: ' + errCheck
         });
       }
 
-      res.status(201).json({
-        success: true,
-        message: 'Luu du lieu thanh cong',
-        insertId: result.insertId
-      });
+      if (rowsCheck && rowsCheck.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: 'Số điện thoại đã được sử dụng đăng ký'
+        });
+      }
+
+      // Nếu chưa tồn tại, thực hiện lưu bản ghi
+      userService.saveRegister(
+        { id, phone, full_name, password_hash, email },
+        (err, result) => {
+          if (err) {
+            return res.status(500).json({
+              success: false,
+              message: 'Lưu người dùng thất bại'
+            });
+          }
+
+          // Sau khi lưu thành công, dùng hàm login để lấy `id` và `full_name`.
+          userRepository.getLoginUser(
+            { id, password_hash },
+            (err2, rows) => {
+              if (err2) {
+                return res.status(500).json({
+                  success: false,
+                  message: 'Tạo người dùng thành công nhưng không thể lấy thông tin: ' + err2
+                });
+              }
+
+              const user = rows && rows[0] ? rows[0] : null;
+              return res.status(201).json({
+                success: true,
+                message: 'Đăng ký người dùng thành công',
+                data: user ? { id: user.id, full_name: user.full_name } : null
+              });
+            }
+          );
+        }
+      );
     }
   );
 };
 
 const loginUser = (req, res) => {
-  // const { id, password_hash } = req.params;
-  const { id, password_hash, full_name } = req.query;
+  // GET /api/user/login
+  // Thực hiện xác thực trong bảng `users` với `id` và `password_hash`.
+  const { id, password_hash } = req.query;
   if (!id || password_hash == null) {
     return res.status(400).json({
       success: false,
-      message: req.params,
-      body: req.body
+      message: 'Thiếu id hoặc password_hash',
+      body: req.query
     });
   }
 
   userService.loginUser(
     { id, password_hash },
-    (err, result, fields) => {                // fields (ít dùng) là metadata (thông tin mô tả các cột) trong kết quả query
-
+    (err, result, fields) => {
       if (err) {
         return res.status(500).json({
           success: false,
@@ -54,7 +95,7 @@ const loginUser = (req, res) => {
       if (!result || result.length === 0) {
         return res.status(401).json({
           success: false,
-          message: 'Sai id hoặc mật khẩu',
+          message: 'Sai id hoặc mật khẩu'
         });
       }
 
@@ -65,15 +106,16 @@ const loginUser = (req, res) => {
       });
     }
   );
-  //getDeviceByUserId.select.sql
 };
 
 const getInfoUser = (req, res) => {
+  // GET /api/user/selectInfo
+  // Lấy hồ sơ người dùng từ bảng `users`.
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({
       success: false,
-      message: 'Thiếu thông tin dữ liệu',
+      message: 'Thiếu id người dùng'
     });
   }
 
@@ -83,13 +125,13 @@ const getInfoUser = (req, res) => {
       if (err) {
         return res.status(500).json({
           success: false,
-          message: 'Dữ liệu người dùng thất bại' + err
+          message: 'Lấy hồ sơ người dùng thất bại: ' + err
         });
       }
 
       res.status(200).json({
         success: true,
-        message: 'Hồ sơ người dùng thành công',
+        message: 'Lấy hồ sơ người dùng thành công',
         data: result[0]
       });
     }
@@ -97,11 +139,13 @@ const getInfoUser = (req, res) => {
 };
 
 const getInfoUserEdit = (req, res) => {
+  // GET /api/user/getInfoEdit
+  // Lấy dữ liệu người dùng để hiển thị trong form chỉnh sửa.
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({
       success: false,
-      message: 'Thiếu thông tin dữ liệu',
+      message: 'Thiếu id người dùng'
     });
   }
 
@@ -111,13 +155,13 @@ const getInfoUserEdit = (req, res) => {
       if (err) {
         return res.status(500).json({
           success: false,
-          message: 'Dữ liệu người dùng thất bại' + err
+          message: 'Lấy thông tin chỉnh sửa thất bại: ' + err
         });
       }
 
       res.status(200).json({
         success: true,
-        message: 'Hồ sơ người dùng thành công',
+        message: 'Lấy thông tin người dùng để chỉnh sửa thành công',
         data: result[0]
       });
     }
@@ -125,11 +169,13 @@ const getInfoUserEdit = (req, res) => {
 };
 
 const postInfoUpdate = (req, res) => {
+  // POST /api/user/updateInfo
+  // Cập nhật thông tin người dùng trong bảng `users`.
   const { id } = req.body;
   if (!id) {
     return res.status(400).json({
       success: false,
-      message: 'Thiếu thông tin dữ liệu',
+      message: 'Thiếu id người dùng'
     });
   }
 
@@ -139,13 +185,13 @@ const postInfoUpdate = (req, res) => {
       if (err) {
         return res.status(500).json({
           success: false,
-          message: 'Dữ liệu người dùng thất bại' + err
+          message: 'Cập nhật thông tin thất bại: ' + err
         });
       }
 
       res.status(200).json({
         success: true,
-        message: 'Lưu thông tin người dùng thành công',
+        message: 'Cập nhật thông tin người dùng thành công',
         data: result[0]
       });
     }

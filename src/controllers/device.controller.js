@@ -67,7 +67,8 @@ const saveDevicesWithUserController = async (req, res) => {
         body: req.body
       });
     }
-    await deviceService.saveDeviceWithUserService({
+
+    const saved = await deviceService.saveDeviceWithUserService({
       idDevices,
       nameDevice,
       userId
@@ -76,12 +77,40 @@ const saveDevicesWithUserController = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Lưu dữ liệu thành công',
+      data: saved
     });
 
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Lưu dữ liệu thất bại'
+      message: 'Lưu dữ liệu thất bại: ' + (error.message || error)
+    });
+  }
+};
+
+const saveHeartRateAndActiveDevice = async (req, res) => {
+  try {
+    const { idUser, idDevices, bpm, mac_address } = req.body;
+    if (!idUser || bpm == null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu dữ liệu',
+        body: req.body
+      });
+    }
+
+    const heartRateService = require('../services/heartRate.service');
+    const result = await heartRateService.saveHeartRateAndUpdateActiveDeviceService({ idUser, idDevices, bpm, mac_address });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lưu nhịp tim và cập nhật active device thành công',
+      data: result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Lưu dữ liệu thất bại: ' + (error.message || error)
     });
   }
 };
@@ -90,4 +119,5 @@ module.exports = {
   getDeviceInfo,
   checkDeviceExist,
   saveDevicesWithUserController
+  , saveHeartRateAndActiveDevice
 };

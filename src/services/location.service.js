@@ -1,13 +1,7 @@
 const getLocationRepository = require('../repositories/location.repository');
-const userRepository = require('../repositories/user.repository');
 
 const saveLocationPlaceService = async (data) => {
-    const userDevice = await userRepository.getUserDeviceId(data);
-    if (!userDevice || userDevice.length === 0) {
-        return null;
-    }
-
-    const locationSave = await getLocationRepository.saveLocationPlaceRepository({ ...data, userDeviceId: userDevice[0].id });
+    const locationSave = await getLocationRepository.saveLocationPlaceRepository(data);
     if (!locationSave || locationSave.length === 0) {
         return null;
     }

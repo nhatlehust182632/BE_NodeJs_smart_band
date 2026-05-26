@@ -5,4 +5,4 @@ JOIN user_devices ud
 JOIN devices d 
     ON d.id = ud.device_id
 WHERE u.id = ?
-  AND ud.pairing_status = 'paired';
+  AND ud.pairing_status = 1;

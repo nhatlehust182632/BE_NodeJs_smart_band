@@ -1,1 +1,1 @@
-INSERT INTO users (id, phone, full_name, password_hash) VALUES (?, ?, ?, ?);
+INSERT INTO users (id, phone, full_name, password_hash, email) VALUES (?, ?, ?, ?, ?);

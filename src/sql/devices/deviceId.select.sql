@@ -1,3 +1,3 @@
 select id
 from devices
-where device_code = ?;
+where device_id = ?;

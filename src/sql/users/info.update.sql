@@ -1,10 +1,10 @@
 UPDATE users
-SET 
+SET
     full_name = ?,
     gender = ?,
+    date_of_birth = ?,
     height_cm = ?,
     weight_kg = ?,
-    age = ?,
-    emergency_contact_name = ?,
-    emergency_contact_phone = ?
+    emergency_phone = ?,
+    enable_heart_rate_alert = ?
 WHERE id = ?;

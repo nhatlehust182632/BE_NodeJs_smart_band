@@ -6,7 +6,7 @@ const { runSqlRepository } = require('../../src/repositories/utils.repository');
 const saveLocationPlaceRepository = (data) => {
     return runSqlRepository({
         sqlDatabase: 'location/placeNow.insert.sql',
-        data: [data.userDeviceId, data.latitude, data.longitude, data.place_key, data.place_name]
+        data: [data.id, data.latitude, data.longitude, data.place_key || null, data.place_name]
     });
 };
 

@@ -6,6 +6,9 @@ const deviceRoutes = require('./routes/device.routes');
 const heartRateRoutes = require('./routes/heartRate.routes');
 const locationRoutes = require('./routes/location.router');
 const monitorRoutes = require('./routes/monitor.router');
+const stepRoutes = require('./routes/step.routes');
+const atrialRoutes = require('./routes/atrial.routes');
+const disconnectRoutes = require('./routes/disconnect.routes');
 
 
 const app = express();
@@ -19,5 +22,8 @@ app.use('/api/device', deviceRoutes);
 app.use('/api/heartRate', heartRateRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/monitor', monitorRoutes);
+app.use('/api/step', stepRoutes);
+app.use('/api/atrial', atrialRoutes);
+app.use('/api/disconnect', disconnectRoutes);
 
 module.exports = app;

@@ -1,5 +1,5 @@
 INSERT INTO location_histories (
-    user_device_id,
+    user_id,
     latitude,
     longitude,
     place_key,

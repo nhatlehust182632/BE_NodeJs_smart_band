@@ -40,13 +40,18 @@ const saveDeviceWithUserService = async ({ idDevices, nameDevice, userId }) => {
   if (existingUserDevice && existingUserDevice.length > 0) {
     return existingUserDevice[0];
   }
-  console.log('Existing User-Device Pair:', existingUserDevice);
 
   const result = await postSaveDevicesWithUser({
     idDevices: deviceId,
     userId: userId
   });
-  return result[0];
+
+  return {
+    id: result.insertId,
+    device_id: deviceId,
+    user_id: userId,
+    pairing_status: 1
+  };
 };
 
 module.exports = {

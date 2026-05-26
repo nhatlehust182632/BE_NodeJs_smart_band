@@ -11,25 +11,33 @@ const getHeartRateInfoRepository = (data) => {
 };
 
 const getHeartRateByTimeRepository = (data) => {
-    switch (data.type) {
-        case '1H':
-            return runSqlRepository({
-                sqlDatabase: 'heartRate/getHeartRate1H.select.sql',
-                data: [data.id]
-            });
-        case '6H':
-            return runSqlRepository({
-                sqlDatabase: 'heartRate/getHeartRate6H.select.sql',
-                data: [data.id]
-            });
-        case '24H':
-            return runSqlRepository({
-                sqlDatabase: 'heartRate/getHeartRate24H.select.sql',
-                data: [data.id]
-            });
-        default:
-        }
-  
+  switch (data.type) {
+    case '1H':
+      return runSqlRepository({
+        sqlDatabase: 'heartRate/getHeartRate1H.select.sql',
+        data: [data.id]
+      });
+    case '6H':
+      return runSqlRepository({
+        sqlDatabase: 'heartRate/getHeartRate6H.select.sql',
+        data: [data.id]
+      });
+    case '24H':
+      return runSqlRepository({
+        sqlDatabase: 'heartRate/getHeartRate24H.select.sql',
+        data: [data.id]
+      });
+    default:
+      return null;
+  }
+
+};
+
+const saveHeartRateDataRepository = (data) => {
+  return runSqlRepository({
+    sqlDatabase: 'heartRate/saveHeartRateData.insert.sql',
+    data: [data.bpm, data.idDevices, data.idUser]
+  });
 };
 
 const getHeartRateHistoryRepository = (data) => {
@@ -41,5 +49,6 @@ const getHeartRateHistoryRepository = (data) => {
 module.exports = {
   getHeartRateInfoRepository,
   getHeartRateByTimeRepository,
-  getHeartRateHistoryRepository
+  getHeartRateHistoryRepository,
+  saveHeartRateDataRepository
 }

@@ -101,7 +101,7 @@ const getInfoHeartRateHistory = async (req, res) => {
 const saveHeartRateDataByDevices = async (req, res) => {
     try {
         const { idUser, idDevices, bpm } = req.body;
-        if (!idUser || !idDevices || !bpm) {
+        if (!idUser || !idDevices || bpm == null) {
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu dữ liệu',
@@ -112,19 +112,45 @@ const saveHeartRateDataByDevices = async (req, res) => {
         if (!result) {
             return res.status(404).json({
                 success: false,
-                message: 'Không tìm thấy dữ liệu'
+                message: 'Không tìm thấy dữ liệu hoặc không có thiết bị phù hợp'
             });
         }
 
         return res.status(200).json({
             success: true,
-            message: 'Lấy dữ liệu thành công',
+            message: 'Lưu nhịp tim thành công',
             data: result
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Lấy dữ liệu thất bại',
+            message: 'Lưu dữ liệu nhịp tim thất bại',
+            error: error.message
+        });
+    }
+};
+
+const saveHeartRateActive = async (req, res) => {
+    try {
+        const { idUser, idDevices, bpm, mac_address } = req.body;
+        if (!idUser || bpm == null) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu dữ liệu',
+                body: req.body
+            });
+        }
+        const result = await heartRateService.saveHeartRateAndUpdateActiveDeviceService({ idUser, idDevices, bpm, mac_address });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Lưu nhịp tim và cập nhật active device thành công',
+            data: result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Lưu dữ liệu thất bại: ' + (error.message || error),
             error: error.message
         });
     }
@@ -134,5 +160,6 @@ module.exports = {
     getInfoHeartRateByUser,
     getInfoHeartRateByTimes,
     getInfoHeartRateHistory,
-    saveHeartRateDataByDevices
+    saveHeartRateDataByDevices,
+    saveHeartRateActive
 };

@@ -66,7 +66,12 @@ const sqlSaveDevices = fs.readFileSync(
 const postSaveDevices = (data, callback) => {
   db.query(
     sqlSaveDevices,
-    [data.idDevices, data.idDevices, data.nameDevice || data.idDevices, 'active'],
+    [
+      data.nameDevice || data.idDevices,
+      data.nameDevice || data.idDevices,
+      null,
+      data.idDevices
+    ],
     callback
   );
 };
@@ -82,6 +87,18 @@ const getDeviceId = (data, callback) => {
     callback
   );
 };
+// get user_device by its id
+const sqlGetUserDeviceById = fs.readFileSync(
+  path.join(__dirname, '../sql/devices/getUserDeviceById.select.sql'),
+  'utf8'
+)
+const getUserDeviceById = (data, callback) => {
+  db.query(
+    sqlGetUserDeviceById,
+    [data.user_device_id],
+    callback
+  );
+};
 // save devices with user
 const sqlSaveDevicesWithUser = fs.readFileSync(
   path.join(__dirname, '../sql/devices/saveDevicesWithUser.insert.sql'),
@@ -90,7 +107,43 @@ const sqlSaveDevicesWithUser = fs.readFileSync(
 const postSaveDevicesWithUser = (data, callback) => {
   db.query(
     sqlSaveDevicesWithUser,
-    [data.userId, data.idDevices, true, 'paired'],
+    [data.userId, data.idDevices, true, 1],
+    callback
+  );
+};
+// user_active_devices helpers
+const sqlGetUserActiveByUser = fs.readFileSync(
+  path.join(__dirname, '../sql/user_active_devices/getByUser.select.sql'),
+  'utf8'
+)
+const getUserActiveByUser = (data, callback) => {
+  db.query(
+    sqlGetUserActiveByUser,
+    [data.user_id],
+    callback
+  );
+};
+
+const sqlInsertUserActive = fs.readFileSync(
+  path.join(__dirname, '../sql/user_active_devices/insert.insert.sql'),
+  'utf8'
+)
+const insertUserActive = (data, callback) => {
+  db.query(
+    sqlInsertUserActive,
+    [data.user_id, data.device_id, data.mac_address],
+    callback
+  );
+};
+
+const sqlUpdateUserActiveByUser = fs.readFileSync(
+  path.join(__dirname, '../sql/user_active_devices/updateByUser.update.sql'),
+  'utf8'
+)
+const updateUserActiveByUser = (data, callback) => {
+  db.query(
+    sqlUpdateUserActiveByUser,
+    [data.device_id, data.mac_address, data.user_id],
     callback
   );
 };
@@ -109,6 +162,10 @@ module.exports = {
   getIdUserDeviceByIdDeviceAndIdUser,
   postSaveDevices,
   getDeviceId,
+  getUserDeviceById,
+  getUserActiveByUser,
+  insertUserActive,
+  updateUserActiveByUser,
   postSaveDevicesWithUser,
   getDeviceIdByUserId
 };

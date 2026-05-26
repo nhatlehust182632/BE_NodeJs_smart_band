@@ -10,7 +10,7 @@ const insertSql = fs.readFileSync(
 const insertRegister = (data, callback) => {
   db.query(
     insertSql,
-    [data.id, data.phone, data.full_name, data.password_hash],
+    [data.id, data.phone, data.full_name, data.password_hash, data.email || null],
     callback
   );
 };
@@ -38,6 +38,18 @@ const getProfileInfo = (data, callback) => {
     callback
   );
 };
+
+const sqlPhoneSelect = fs.readFileSync(
+  path.join(__dirname, '../sql/users/phone.select.sql'),
+  'utf8'
+)
+const getUserByPhone = (data, callback) => {
+  db.query(
+    sqlPhoneSelect,
+    [data.phone],
+    callback
+  );
+};
 // getInfoEdit
 const sqlUserInfoEdit = fs.readFileSync(
   path.join(__dirname, '../sql/users/infoEdit.select.sql'),
@@ -57,12 +69,17 @@ const sqlUserInfoUpdate = fs.readFileSync(
   'utf8'
 )
 const postUserInfoUpdate = (data, callback) => {
-  console.log("111 : " + data.full_name + data.gender);
   db.query(
     sqlUserInfoUpdate,
     [
-      data.full_name, data.gender, data.height_cm, data.weight_kg, data.age,
-      data.emergency_contact_name, data.emergency_contact_phone, data.id
+      data.full_name,
+      data.gender,
+      data.date_of_birth,
+      data.height_cm,
+      data.weight_kg,
+      data.emergency_phone,
+      data.enable_heart_rate_alert,
+      data.id
     ],
     callback
   );
@@ -79,6 +96,7 @@ module.exports = {
   insertRegister,
   getLoginUser,
   getProfileInfo,
+  getUserByPhone,
   getUserInfoEdit,
   postUserInfoUpdate,
   getUserDeviceId

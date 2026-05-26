@@ -1,6 +1,6 @@
-select d.device_code
+select d.id
 from devices d
 Inner join user_devices ud ON ud.device_id = d.id
-Where d.device_code = ?
+Where d.device_id = ?
 AND ud.user_id = ?
-and pairing_status = 'paired';
+and ud.pairing_status = 1;

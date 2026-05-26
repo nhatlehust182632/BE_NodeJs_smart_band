@@ -14,6 +14,10 @@ const getProfileInfo = (data, callback) => {
   userRepository.getProfileInfo(data, callback);
 };
 
+const getUserByPhone = (data, callback) => {
+  userRepository.getUserByPhone(data, callback);
+};
+
 const getUserInfoEdit = (data, callback) => {
   userRepository.getUserInfoEdit(data, callback);
 };
@@ -26,6 +30,7 @@ module.exports = {
   saveRegister,
   loginUser,
   getProfileInfo,
+  getUserByPhone,
   getProfileInfoEdit,
   getUserInfoEdit
 };

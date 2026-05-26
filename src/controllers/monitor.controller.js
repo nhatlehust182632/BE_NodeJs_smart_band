@@ -15,7 +15,7 @@ const selectMonitorList = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: 'Không tìm thấy dữ liệu',
-                error: error.message
+                data: []
             });
         }
 
@@ -49,7 +49,7 @@ const selectMonitorId = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: 'Không tìm thấy dữ liệu',
-                error: error.message
+                data: null
             });
         }
 
