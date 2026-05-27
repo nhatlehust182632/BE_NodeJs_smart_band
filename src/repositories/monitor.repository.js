@@ -14,7 +14,47 @@ const getMonitorIdRepository = (data) => {
     });
 };
 
+const getFollowingRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/getFollowing.select.sql',
+        data: [data.idUser]
+    });
+};
+
+const getFollowersRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/getFollowers.select.sql',
+        data: [data.idUser]
+    });
+};
+
+const getPendingForTargetRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/getPendingForTarget.select.sql',
+        data: [data.idUser]
+    });
+};
+
+const approveRequestRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/approveRequest.update.sql',
+        data: [data.relationId, data.idUser]
+    });
+};
+
+const createRequestByPhoneRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/createRequestByPhone.insert.sql',
+        data: [data.idUser, data.targetUserId, data.relationship_type || 8, data.permission_level || 1]
+    });
+};
+
 module.exports = {
     getListMonitorRepository,
-    getMonitorIdRepository
-}
+    getMonitorIdRepository,
+    getFollowingRepository,
+    getFollowersRepository,
+    getPendingForTargetRepository,
+    approveRequestRepository,
+    createRequestByPhoneRepository
+};
