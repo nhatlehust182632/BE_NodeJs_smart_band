@@ -169,9 +169,8 @@ const getInfoUserEdit = (req, res) => {
 };
 
 const postInfoUpdate = (req, res) => {
-  // POST /api/user/updateInfo
-  // Cập nhật thông tin người dùng trong bảng `users`.
   const { id } = req.body;
+
   if (!id) {
     return res.status(400).json({
       success: false,
@@ -189,10 +188,20 @@ const postInfoUpdate = (req, res) => {
         });
       }
 
-      res.status(200).json({
+      if (!result || result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy người dùng để cập nhật'
+        });
+      }
+
+      return res.status(200).json({
         success: true,
         message: 'Cập nhật thông tin người dùng thành công',
-        data: result[0]
+        data: {
+          affectedRows: result.affectedRows,
+          changedRows: result.changedRows
+        }
       });
     }
   );

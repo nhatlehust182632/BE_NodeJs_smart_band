@@ -183,6 +183,81 @@ const sendFollowRequestByPhoneController = async (req, res) => {
     }
 };
 
+const cancelMonitoringController = async (req, res) => {
+    try {
+        const { idUser, relationId } = req.body;
+
+        if (!idUser || !relationId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thieu du lieu',
+                body: req.body
+            });
+        }
+
+        const result = await monitorService.cancelMonitoringService({
+            idUser,
+            relationId
+        });
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Khong tim thay quan he giam sat hop le de huy'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Huy giam sat thanh cong',
+            data: result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Huy giam sat that bai',
+            error: error.message
+        });
+    }
+};
+
+const cancelFollowerController = async (req, res) => {
+    try {
+        const { idUser, relationId } = req.body;
+
+        if (!idUser || !relationId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thieu du lieu',
+                body: req.body
+            });
+        }
+
+        const result = await monitorService.cancelFollowerService({
+            idUser,
+            relationId
+        });
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Khong tim thay nguoi dang giam sat ban de huy'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Da huy nguoi nay giam sat ban',
+            data: result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Huy nguoi giam sat that bai',
+            error: error.message
+        });
+    }
+};
 
 module.exports = {
     selectMonitorList,
@@ -191,5 +266,7 @@ module.exports = {
     getFollowersController,
     getPendingRequestsController,
     approveRequestController,
-    sendFollowRequestByPhoneController
+    sendFollowRequestByPhoneController,
+    cancelMonitoringController,
+    cancelFollowerController
 };

@@ -9,5 +9,7 @@ router.get('/followers', monitorController.getFollowersController);
 router.get('/pending-requests', monitorController.getPendingRequestsController);
 router.post('/approve-request', monitorController.approveRequestController);
 router.post('/request-by-phone', monitorController.sendFollowRequestByPhoneController);
+router.post('/cancel-monitoring', monitorController.cancelMonitoringController);
+router.post('/cancel-follower', monitorController.cancelFollowerController);
 
 module.exports = router;

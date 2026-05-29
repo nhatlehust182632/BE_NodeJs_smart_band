@@ -11,19 +11,16 @@ SELECT
         WHEN 6 THEN 'Bạn bè'
         WHEN 7 THEN 'Huấn luyện viên'
         ELSE 'Khác'
-    END AS relation
-    umr.status AS isConnected,
+    END AS relation,
+    IF(uad.is_connected = 1, 1, 0) AS isConnected,
     IF(uh.heart_rate > 130, 'Cảnh báo', 'Bình thường') AS status,
     uh.heart_rate AS heartRate,
     loc_latest.place_name AS location
 FROM user_monitor_relations umr
 JOIN users u
     ON u.id = umr.target_user_id
-JOIN user_devices ud
-    ON ud.user_id = u.id
-   AND ud.pairing_status = 1
-LEFT JOIN devices d
-    ON d.id = ud.device_id
+LEFT JOIN user_active_devices uad
+    ON uad.user_id = u.id
 LEFT JOIN user_health uh
     ON uh.id = (
         SELECT uh2.id
@@ -46,5 +43,3 @@ LEFT JOIN location_histories loc_latest
 WHERE umr.monitor_user_id = ?
   AND umr.status = 2
 ORDER BY u.full_name ASC;
-
-

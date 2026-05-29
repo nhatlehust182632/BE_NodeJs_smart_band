@@ -5,6 +5,7 @@ SELECT
     u.full_name,
     u.gender,
     u.date_of_birth,
+    TIMESTAMPDIFF(YEAR, u.date_of_birth, CURDATE()) AS age,
     u.height_cm,
     u.weight_kg,
     u.emergency_phone,

@@ -2,39 +2,30 @@ const getLocationRepository = require('../repositories/location.repository');
 
 const saveLocationPlaceService = async (data) => {
     const locationSave = await getLocationRepository.saveLocationPlaceRepository(data);
-    if (!locationSave || locationSave.length === 0) {
+
+    if (!locationSave) {
         return null;
     }
 
     const locationHistory = await getLocationRepository.getLocationHistoryRepository(data);
-    if (!locationHistory || locationHistory.length === 0) {
-        return null;
-    }
     const locationTop = await getLocationRepository.getLocationTopRepository(data);
-    if (!locationTop || locationTop.length === 0) {
-        return null;
-    }
+
     return {
-        historyData: locationHistory,
-        topData: locationTop
+        historyData: Array.isArray(locationHistory) ? locationHistory : [],
+        topData: Array.isArray(locationTop) ? locationTop : []
     };
 };
 
 const getHistoryLocationService = async (data) => {
     const locationHistory = await getLocationRepository.getLocationHistoryRepository(data);
-    if (!locationHistory || locationHistory.length === 0) {
-        return null;
-    }
 
-    return locationHistory;
+    return Array.isArray(locationHistory) ? locationHistory : [];
 };
 
 const getTopLocationService = async (data) => {
     const locationTop = await getLocationRepository.getLocationTopRepository(data);
-    if (!locationTop || locationTop.length === 0) {
-        return null;
-    }
-    return locationTop;
+
+    return Array.isArray(locationTop) ? locationTop : [];
 };
 
 module.exports = {

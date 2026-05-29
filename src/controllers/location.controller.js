@@ -1,22 +1,8 @@
 const locationService = require('../services/location.service');
 
-const generatePlaceKey = (latitude, longitude, gridSizeMeters = 100) => {
-    const lat = Number(latitude);
-    const lng = Number(longitude);
-    const latRad = (lat * Math.PI) / 180;
-
-    const metersPerDegreeLat = 111320;
-    const metersPerDegreeLng = 111320 * Math.cos(latRad);
-
-    const latGrid = Math.round((lat * metersPerDegreeLat) / gridSizeMeters);
-    const lngGrid = Math.round((lng * metersPerDegreeLng) / gridSizeMeters);
-
-    return `${latGrid}_${lngGrid}`;
-};
-
 const insertLocation = async (req, res) => {
     try {
-        const { id, latitude, longitude, place_name } = req.body;
+        const { id, latitude, longitude, place_key, place_name, days } = req.body;
         if (!id || latitude === undefined || longitude === undefined || !place_name) {
             return res.status(400).json({
                 success: false,
@@ -39,11 +25,11 @@ const insertLocation = async (req, res) => {
             ...req.body,
             latitude: lat,
             longitude: lng,
-            place_key: generatePlaceKey(lat, lng)
+            days: Number(days) || 1,
+            place_key: place_key
         };
 
         const result = await locationService.saveLocationPlaceService(payload);
-        // console.log('Result from saveLocationPlaceService:', result);
         if (!result) {
             return res.status(404).json({
                 success: false,
@@ -68,7 +54,8 @@ const insertLocation = async (req, res) => {
 
 const getHistoryLocationController = async (req, res) => {
     try {
-        const { id } = req.query;
+        const { id, days } = req.query;
+
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -76,15 +63,22 @@ const getHistoryLocationController = async (req, res) => {
                 body: req.query
             });
         }
-        const result = await locationService.getHistoryLocationService({ id });
-        // console.log('Result from getHistoryLocationService:', result);
-        // if (!result) {
-        //     return res.status(404).json({
-        //         success: false,
-        //         message: 'Không tìm thấy dữ liệu',
-        //         data: []
-        //     });
-        // }
+
+        const filterDays = Number(days) || 1;
+
+        if (![1, 3, 7].includes(filterDays)) {
+            return res.status(400).json({
+                success: false,
+                message: 'days khong hop le, chi chap nhan 1, 3, 7',
+                body: req.query
+            });
+        }
+
+        const result = await locationService.getHistoryLocationService({
+            id,
+            days: filterDays
+        });
+
         return res.status(200).json({
             success: true,
             message: 'Lấy lịch sử thành công',
@@ -101,7 +95,8 @@ const getHistoryLocationController = async (req, res) => {
 
 const getTopLocationController = async (req, res) => {
     try {
-        const { id } = req.query;
+        const { id, days } = req.query;
+
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -109,15 +104,21 @@ const getTopLocationController = async (req, res) => {
                 body: req.query
             });
         }
-        const result = await locationService.getTopLocationService({ id });
-        // console.log('Result from getTopLocationService:', result);
-        if (!result) {
-            return res.status(404).json({
+
+        const filterDays = Number(days) || 1;
+
+        if (![1, 3, 7].includes(filterDays)) {
+            return res.status(400).json({
                 success: false,
-                message: 'Không tìm thấy dữ liệu',
-                error: 'No top locations found'
+                message: 'days khong hop le, chi chap nhan 1, 3, 7',
+                body: req.query
             });
         }
+
+        const result = await locationService.getTopLocationService({
+            id,
+            days: filterDays
+        });
 
         return res.status(200).json({
             success: true,

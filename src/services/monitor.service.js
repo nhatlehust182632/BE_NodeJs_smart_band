@@ -47,6 +47,22 @@ const createRequestByPhoneService = async (data) => {
     return result;
 };
 
+const cancelMonitoringService = async (data) => {
+    const result = await getMonitorRepository.cancelMonitoringRepository(data);
+    if (!result || result.affectedRows === 0) {
+        return null;
+    }
+    return result;
+};
+
+const cancelFollowerService = async (data) => {
+    const result = await getMonitorRepository.cancelFollowerRepository(data);
+    if (!result || result.affectedRows === 0) {
+        return null;
+    }
+    return result;
+};
+
 module.exports = {
     getListMonitorByIdService,
     getMonitorIdDetailService,
@@ -54,5 +70,7 @@ module.exports = {
     getFollowersService,
     getPendingForTargetService,
     approveRequestService,
-    createRequestByPhoneService
+    createRequestByPhoneService,
+    cancelMonitoringService,
+    cancelFollowerService
 };

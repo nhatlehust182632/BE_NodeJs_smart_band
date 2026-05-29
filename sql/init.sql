@@ -32,7 +32,7 @@ CREATE TABLE devices (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    UNIQUE KEY uk_devices_mac_address (mac_address)
+    UNIQUE KEY uk_devices_device_id (device_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- bảng lưu thông tin người dùng - thiết bị

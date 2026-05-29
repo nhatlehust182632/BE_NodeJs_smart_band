@@ -49,6 +49,20 @@ const createRequestByPhoneRepository = (data) => {
     });
 };
 
+const cancelMonitoringRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/cancelMonitoring.update.sql',
+        data: [data.relationId, data.idUser]
+    });
+};
+
+const cancelFollowerRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/cancelFollower.update.sql',
+        data: [data.relationId, data.idUser]
+    });
+};
+
 module.exports = {
     getListMonitorRepository,
     getMonitorIdRepository,
@@ -56,5 +70,7 @@ module.exports = {
     getFollowersRepository,
     getPendingForTargetRepository,
     approveRequestRepository,
-    createRequestByPhoneRepository
+    createRequestByPhoneRepository,
+    cancelMonitoringRepository,
+    cancelFollowerRepository
 };
