@@ -1,29 +1,47 @@
 SELECT
-    t.bpm,
-    DATE_FORMAT(t.bucket_time, '%H:%i') AS time_hhmm
+    final.bpm,
+    DATE_FORMAT(final.bucket_time, '%H:%i') AS time_hhmm
 FROM (
-    SELECT
-        TIMESTAMP(
-            DATE(uh.recorded_at),
-            MAKETIME(HOUR(uh.recorded_at), FLOOR(MINUTE(uh.recorded_at) / 5) * 5, 0)
-        ) AS bucket_time,
-        uh.heart_rate AS bpm,
-        uh.recorded_at,
-        uh.id,
-        ROW_NUMBER() OVER (
-            PARTITION BY TIMESTAMP(
-                DATE(uh.recorded_at),
-                MAKETIME(HOUR(uh.recorded_at), FLOOR(MINUTE(uh.recorded_at) / 5) * 5, 0)
-            )
-            ORDER BY uh.recorded_at DESC, uh.id DESC
-        ) AS rn
-    FROM user_health uh
-    JOIN user_devices ud ON uh.user_device_id = ud.id
-    JOIN devices d ON ud.device_id = d.id
-    WHERE ud.user_id = ?
-      AND d.status = 1
-      AND uh.recorded_at <= NOW()
-) t
-WHERE t.rn = 1
-ORDER BY t.bucket_time ASC
-LIMIT 12;
+    SELECT *
+    FROM (
+        SELECT
+            t.bpm,
+            t.bucket_time
+        FROM (
+            SELECT
+                TIMESTAMP(
+                    DATE(uh.recorded_at),
+                    MAKETIME(
+                        HOUR(uh.recorded_at),
+                        FLOOR(MINUTE(uh.recorded_at) / 5) * 5,
+                        0
+                    )
+                ) AS bucket_time,
+                uh.heart_rate AS bpm,
+                uh.recorded_at,
+                uh.id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY TIMESTAMP(
+                        DATE(uh.recorded_at),
+                        MAKETIME(
+                            HOUR(uh.recorded_at),
+                            FLOOR(MINUTE(uh.recorded_at) / 5) * 5,
+                            0
+                        )
+                    )
+                    ORDER BY uh.recorded_at DESC, uh.id DESC
+                ) AS rn
+            FROM user_health uh
+            JOIN user_devices ud ON uh.user_device_id = ud.id
+            JOIN devices d ON ud.device_id = d.id
+            WHERE ud.user_id = 378147307
+              AND d.status = 1
+              AND uh.recorded_at >= NOW() - INTERVAL 1 HOUR
+              AND uh.recorded_at <= NOW()
+        ) t
+        WHERE t.rn = 1
+        ORDER BY t.bucket_time DESC
+        LIMIT 12
+    ) latest_12
+    ORDER BY latest_12.bucket_time ASC
+) final;
