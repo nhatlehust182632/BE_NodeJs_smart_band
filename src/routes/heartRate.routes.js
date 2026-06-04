@@ -21,13 +21,13 @@ router.get('/ChartTime', heartRateController.getInfoHeartRateByTimes);
 router.get('/history', heartRateController.getInfoHeartRateHistory);
 
 // POST /api/heartRate/saveHeartRateData
-// Input: body { idUser: <userId>, idDevices: <user_device_id>, bpm: <heart rate> }
+// Input: body { idUser: <userId>, bpm: <heart rate>, idDevices?: <user_device_id hoặc devices.id> }
 // Output: { success, message, data: <insert result> }
 // Yêu cầu: Lưu nhịp tim mới vào bảng `user_health` qua user_device hiện có
 router.post('/saveHeartRateData', heartRateController.saveHeartRateDataByDevices);
 
 // POST /api/heartRate/saveHeartRateActive
-// Input: body { idUser: <userId>, bpm: <heart rate>, idDevices?: <user_device_id>, mac_address: <device MAC address> }
+// Input: body { idUser: <userId>, bpm: <heart rate>, idDevices?: <user_device_id hoặc devices.id>, mac_address?: <device MAC address> }
 // Output: { success, message, data: { user_device_id, device_id, saved: true } }
 // Yêu cầu: Lưu nhịp tim và cập nhật hoặc tạo `user_active_devices`; nếu cần, tạo user_device mới
 router.post('/saveHeartRateActive', heartRateController.saveHeartRateActive);

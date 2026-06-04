@@ -28,5 +28,7 @@ const deviceController = require('../controllers/device.controller');
 router.get('/getDeviceByUser', deviceController.getDeviceInfo);
 router.get('/checkDeviceExist', deviceController.checkDeviceExist);
 router.post('/saveDevicesWithUser', deviceController.saveDevicesWithUserController);
+router.post('/saveBatteryLog', deviceController.saveBatteryLogController);
+router.post('/disconnectActiveDevice', deviceController.disconnectActiveDeviceController);
 
 module.exports = router;

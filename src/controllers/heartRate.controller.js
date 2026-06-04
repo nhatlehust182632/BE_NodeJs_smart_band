@@ -101,7 +101,7 @@ const getInfoHeartRateHistory = async (req, res) => {
 const saveHeartRateDataByDevices = async (req, res) => {
     try {
         const { idUser, idDevices, bpm } = req.body;
-        if (!idUser || !idDevices || bpm == null) {
+        if (!idUser || bpm == null) {
             return res.status(400).json({
                 success: false,
                 message: 'Thiếu dữ liệu',
@@ -112,7 +112,7 @@ const saveHeartRateDataByDevices = async (req, res) => {
         if (!result) {
             return res.status(404).json({
                 success: false,
-                message: 'Không tìm thấy dữ liệu hoặc không có thiết bị phù hợp'
+                message: 'Không tìm thấy user hoặc user không active'
             });
         }
 

@@ -32,10 +32,7 @@ FROM (
                     ORDER BY uh.recorded_at DESC, uh.id DESC
                 ) AS rn
             FROM user_health uh
-            JOIN user_devices ud ON uh.user_device_id = ud.id
-            JOIN devices d ON ud.device_id = d.id
-            WHERE ud.user_id = 378147307
-              AND d.status = 1
+            WHERE uh.user_id = ?
               AND uh.recorded_at >= NOW() - INTERVAL 24 HOUR
               AND uh.recorded_at <= NOW()
         ) t

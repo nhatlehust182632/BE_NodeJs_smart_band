@@ -36,7 +36,7 @@ const getHeartRateByTimeRepository = (data) => {
 const saveHeartRateDataRepository = (data) => {
   return runSqlRepository({
     sqlDatabase: 'heartRate/saveHeartRateData.insert.sql',
-    data: [data.bpm, data.idDevices, data.idUser]
+    data: [data.bpm, data.idUser]
   });
 };
 

@@ -1,4 +1,4 @@
-const { runSqlRepository } = require('../../src/repositories/utils.repository');
+const { runSqlRepository } = require('./utils.repository');
 
 const getListMonitorRepository = (data) => {
     return runSqlRepository({
@@ -42,10 +42,22 @@ const approveRequestRepository = (data) => {
     });
 };
 
+const rejectRequestRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'monitor/rejectRequest.update.sql',
+        data: [data.relationId, data.idUser]
+    });
+};
+
 const createRequestByPhoneRepository = (data) => {
     return runSqlRepository({
         sqlDatabase: 'monitor/createRequestByPhone.insert.sql',
-        data: [data.idUser, data.targetUserId, data.relationship_type || 8, data.permission_level || 1]
+        data: [
+            data.idUser,
+            data.targetUserId,
+            data.relationship_type || 8,
+            data.permission_level || 1
+        ]
     });
 };
 
@@ -70,6 +82,7 @@ module.exports = {
     getFollowersRepository,
     getPendingForTargetRepository,
     approveRequestRepository,
+    rejectRequestRepository,
     createRequestByPhoneRepository,
     cancelMonitoringRepository,
     cancelFollowerRepository

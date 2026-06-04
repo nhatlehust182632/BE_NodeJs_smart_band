@@ -115,9 +115,81 @@ const saveHeartRateAndActiveDevice = async (req, res) => {
   }
 };
 
+
+
+const disconnectActiveDeviceController = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu dữ liệu',
+        body: req.body
+      });
+    }
+
+    const result = await deviceService.disconnectActiveDeviceService({ user_id });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Đã ngắt trạng thái kết nối thiết bị',
+      data: result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Ngắt trạng thái kết nối thiết bị thất bại: ' + (error.message || error),
+      error: error.message
+    });
+  }
+};
+
+const saveBatteryLogController = async (req, res) => {
+  try {
+    const { user_id, user_device_id, battery_percent, is_charging } = req.body;
+
+    if (!user_id || !user_device_id || battery_percent == null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu dữ liệu',
+        body: req.body
+      });
+    }
+
+    const result = await deviceService.saveBatteryLogService({
+      user_id,
+      user_device_id,
+      battery_percent,
+      is_charging: is_charging ? 1 : 0,
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy user_device phù hợp để lưu pin'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lưu pin thiết bị thành công',
+      data: result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Lưu pin thiết bị thất bại: ' + (error.message || error),
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getDeviceInfo,
   checkDeviceExist,
-  saveDevicesWithUserController
-  , saveHeartRateAndActiveDevice
+  saveDevicesWithUserController,
+  disconnectActiveDeviceController,
+  saveBatteryLogController,
+  saveHeartRateAndActiveDevice
 };

@@ -1,65 +1,82 @@
-const getMonitorRepository = require('../repositories/monitor.repository');
+const monitorRepository = require('../repositories/monitor.repository');
 
 const getListMonitorByIdService = async (data) => {
-    const listMonitor = await getMonitorRepository.getListMonitorRepository(data);
-    if (!listMonitor || listMonitor.length === 0) {
-        return null;
-    }
-    return listMonitor;
+    const rows = await monitorRepository.getListMonitorRepository(data);
+    return rows || [];
 };
 
 const getMonitorIdDetailService = async (data) => {
-    const listMonitor = await getMonitorRepository.getMonitorIdRepository(data);
-    if (!listMonitor || listMonitor.length === 0) {
+    const rows = await monitorRepository.getMonitorIdRepository(data);
+
+    if (!rows || rows.length === 0) {
         return null;
     }
-    return listMonitor[0];
+
+    return rows[0];
 };
 
 const getFollowingService = async (data) => {
-    const rows = await getMonitorRepository.getFollowingRepository(data);
+    const rows = await monitorRepository.getFollowingRepository(data);
     return rows || [];
 };
 
 const getFollowersService = async (data) => {
-    const rows = await getMonitorRepository.getFollowersRepository(data);
+    const rows = await monitorRepository.getFollowersRepository(data);
     return rows || [];
 };
 
 const getPendingForTargetService = async (data) => {
-    const rows = await getMonitorRepository.getPendingForTargetRepository(data);
+    const rows = await monitorRepository.getPendingForTargetRepository(data);
     return rows || [];
 };
 
 const approveRequestService = async (data) => {
-    const result = await getMonitorRepository.approveRequestRepository(data);
+    const result = await monitorRepository.approveRequestRepository(data);
+
     if (!result || result.affectedRows === 0) {
         return null;
     }
+
+    return result;
+};
+
+const rejectRequestService = async (data) => {
+    const result = await monitorRepository.rejectRequestRepository(data);
+
+    if (!result || result.affectedRows === 0) {
+        return null;
+    }
+
     return result;
 };
 
 const createRequestByPhoneService = async (data) => {
-    const result = await getMonitorRepository.createRequestByPhoneRepository(data);
+    const result = await monitorRepository.createRequestByPhoneRepository(data);
+
     if (!result || result.affectedRows === 0) {
         return null;
     }
+
     return result;
 };
 
 const cancelMonitoringService = async (data) => {
-    const result = await getMonitorRepository.cancelMonitoringRepository(data);
+    const result = await monitorRepository.cancelMonitoringRepository(data);
+
     if (!result || result.affectedRows === 0) {
         return null;
     }
+
     return result;
 };
 
 const cancelFollowerService = async (data) => {
-    const result = await getMonitorRepository.cancelFollowerRepository(data);
+    const result = await monitorRepository.cancelFollowerRepository(data);
+
     if (!result || result.affectedRows === 0) {
         return null;
     }
+
     return result;
 };
 
@@ -70,6 +87,7 @@ module.exports = {
     getFollowersService,
     getPendingForTargetService,
     approveRequestService,
+    rejectRequestService,
     createRequestByPhoneService,
     cancelMonitoringService,
     cancelFollowerService

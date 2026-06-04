@@ -1,13 +1,13 @@
 INSERT INTO user_health (
-    user_device_id,
+    user_id,
     heart_rate,
     recorded_at
 )
 SELECT
-    ud.id,
+    u.id,
     ?,
     NOW()
-FROM user_devices ud
-WHERE ud.id = ?
-  AND ud.user_id = ?
+FROM users u
+WHERE u.id = ?
+  AND u.status = 1
 LIMIT 1;

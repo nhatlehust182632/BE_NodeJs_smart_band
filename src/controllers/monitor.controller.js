@@ -259,6 +259,41 @@ const cancelFollowerController = async (req, res) => {
     }
 };
 
+const rejectRequestController = async (req, res) => {
+    try {
+        const { idUser, relationId } = req.body;
+
+        if (!idUser || !relationId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu idUser hoặc relationId',
+                body: req.body
+            });
+        }
+
+        const result = await monitorService.rejectRequestService({ idUser, relationId });
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy yêu cầu hợp lệ để hủy'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Đã hủy yêu cầu giám sát',
+            data: result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Hủy yêu cầu giám sát thất bại',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     selectMonitorList,
     selectMonitorId,
@@ -268,5 +303,6 @@ module.exports = {
     approveRequestController,
     sendFollowRequestByPhoneController,
     cancelMonitoringController,
-    cancelFollowerController
+    cancelFollowerController,
+    rejectRequestController
 };

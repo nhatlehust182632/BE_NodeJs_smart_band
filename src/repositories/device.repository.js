@@ -147,6 +147,31 @@ const updateUserActiveByUser = (data, callback) => {
     callback
   );
 };
+
+
+const sqlDisconnectUserActiveByUser = fs.readFileSync(
+  path.join(__dirname, '../sql/user_active_devices/disconnectByUser.update.sql'),
+  'utf8'
+)
+const disconnectUserActiveByUser = (data, callback) => {
+  db.query(
+    sqlDisconnectUserActiveByUser,
+    [data.user_id],
+    callback
+  );
+};
+
+const sqlSaveBatteryLog = fs.readFileSync(
+  path.join(__dirname, '../sql/devices/saveBatteryLog.insert.sql'),
+  'utf8'
+);
+const saveBatteryLog = (data, callback) => {
+  db.query(
+    sqlSaveBatteryLog,
+    [data.battery_percent, data.is_charging, data.user_device_id, data.user_id],
+    callback
+  );
+};
 // get device id by user id
 const getDeviceIdByUserId = (data) => {
   return runSqlRepository({
@@ -166,6 +191,8 @@ module.exports = {
   getUserActiveByUser,
   insertUserActive,
   updateUserActiveByUser,
+  disconnectUserActiveByUser,
+  saveBatteryLog,
   postSaveDevicesWithUser,
   getDeviceIdByUserId
 };
