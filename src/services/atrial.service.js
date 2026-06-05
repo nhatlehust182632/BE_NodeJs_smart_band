@@ -16,7 +16,16 @@ const countAtrialAlertsByDateService = async (data) => {
     return result[0];
 };
 
+const getAtrialAlertsTodayService = async (data) => {
+    const result = await atrialRepository.getAtrialAlertsTodayRepository(data);
+    if (!result || result.length === 0) {
+        return [];
+    }
+    return result;
+};
+
 module.exports = {
     saveAtrialAlertService,
-    countAtrialAlertsByDateService
+    countAtrialAlertsByDateService,
+    getAtrialAlertsTodayService
 };

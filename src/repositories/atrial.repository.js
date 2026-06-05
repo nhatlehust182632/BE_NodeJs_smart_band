@@ -18,7 +18,15 @@ const countAtrialAlertsByDateRepository = (data) => {
     });
 };
 
+const getAtrialAlertsTodayRepository = (data) => {
+    return runSqlRepository({
+        sqlDatabase: 'atrial/listToday.select.sql',
+        data: [data.idUser, data.date || null]
+    });
+};
+
 module.exports = {
     saveAtrialAlertRepository,
-    countAtrialAlertsByDateRepository
+    countAtrialAlertsByDateRepository,
+    getAtrialAlertsTodayRepository
 };

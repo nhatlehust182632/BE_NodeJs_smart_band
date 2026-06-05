@@ -71,7 +71,36 @@ const getAtrialAlertCountController = async (req, res) => {
     }
 };
 
+
+const getAtrialAlertsTodayController = async (req, res) => {
+    try {
+        const { idUser, date } = req.query;
+        if (!idUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thieu du lieu',
+                body: req.query
+            });
+        }
+
+        const result = await atrialService.getAtrialAlertsTodayService({ idUser, date });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Lay danh sach canh bao rung nhi trong ngay thanh cong',
+            data: result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Lay danh sach canh bao rung nhi that bai',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     saveAtrialAlertController,
-    getAtrialAlertCountController
+    getAtrialAlertCountController,
+    getAtrialAlertsTodayController
 };
