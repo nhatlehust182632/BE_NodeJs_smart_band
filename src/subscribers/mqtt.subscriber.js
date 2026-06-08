@@ -13,22 +13,38 @@ const startMqttSubscriber = () => {
       }
     });
   });
-
   mqttClient.on('message', (topic, message) => {
-    try {
-      const data = JSON.parse(message.toString());
+    const data = Buffer.from(message.toString('hex'), 'hex');
+    sensorService.saveSensorData(data, (err, result) => {
+      if (err) {
+        console.error('MQTT HEX parse/save error:', err.message);
+        return;
+      }
 
-      sensorService.saveSensorData(data, (err, result) => {
-        if (err) {
-          console.error('Save DB error:', err);
-        } else {
-          console.log('Saved to DB:', result.insertId);
-        }
-      });
-    } catch (error) {
-      console.error('MQTT parse error:', error.message);
-    }
+      if (result && result.saved) {
+        console.log('Saved to DB:', result.insertId);
+        return;
+      }
+
+      console.log('HEX packet parsed, DB not saved:', result && result.message);
+    });
   });
+
+  // mqttClient.on('message', (topic, message) => {
+  //   try {
+  //     const data = JSON.parse(message.toString());
+
+  //     sensorService.saveSensorData(data, (err, result) => {
+  //       if (err) {
+  //         console.error('Save DB error:', err);
+  //       } else {
+  //         console.log('Saved to DB:', result.insertId);
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('MQTT parse error:', error.message);
+  //   }
+  // });
 };
 
 module.exports = startMqttSubscriber;
