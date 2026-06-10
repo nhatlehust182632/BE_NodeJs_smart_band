@@ -154,16 +154,16 @@ const getPlaceNameFromCoords = async (latitude, longitude) => {
 
 const saveSensorData = async (data, callback) => {
   // Chuyển hex string -> Buffer
-  if (typeof message === 'string') message = Buffer.from(message, 'hex');
+  if (typeof data === 'string') data = Buffer.from(data, 'hex');
 
-  const eventType = (message[6] >> 4) & 0x0F;
+  const eventType = (data[6] >> 4) & 0x0F;
 
   if (eventType === 0) {
     // xử lý pin
-    await handleType0Battery(eventType, message);
+    await handleType0Battery(eventType, data);
   } else if (eventType === 3) {
     // xử lý vị trí
-    await handleType3Location(eventType, message);
+    await handleType3Location(eventType, data);
   } else {
     console.log('Unknown type', eventType);
   }
