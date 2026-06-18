@@ -4,5 +4,6 @@ SELECT
     'Cảnh báo bất thường' AS message
 FROM atrial_fibrillation_alerts
 WHERE user_id = ?
-  AND DATE(created_at) = COALESCE(?, CURDATE())
-ORDER BY created_at DESC, id DESC;
+  -- AND DATE(created_at) = COALESCE(?, CURDATE())
+ORDER BY created_at DESC, id DESC
+LIMIT 10;
