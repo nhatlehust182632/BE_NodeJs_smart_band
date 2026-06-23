@@ -125,6 +125,105 @@ const getLatestSensorData = (callback) => {
   db.query(sql, callback);
 };
 
+const findActiveUserDeviceByMac = async (macAddress) => {
+  const sql = `
+    SELECT
+      uad.user_id,
+      ud.id AS user_device_id
+    FROM user_active_devices uad
+    LEFT JOIN user_devices ud
+      ON ud.user_id = uad.user_id
+      AND ud.device_id = uad.device_id
+      AND ud.pairing_status = 1
+    WHERE REPLACE(REPLACE(LOWER(uad.mac_address), ':', ''), '-', '') = ?
+    LIMIT 1
+  `;
+
+  const [rows] = await db.promise().query(sql, [macAddress]);
+  return rows.length > 0 ? rows[0] : null;
+};
+
+const findDeviceStatusDefinitions = async ({
+  bleStatus,
+  imuStatus,
+  ppgStatus,
+  gaugeStatus,
+  gnssStatus,
+  lteStatus,
+}) => {
+  const sql = `
+    SELECT
+      component_code,
+      status_value,
+      status_code,
+      status_name
+    FROM device_status_definitions
+    WHERE (component_code = 'BLE' AND status_value = ?)
+       OR (component_code = 'IMU' AND status_value = ?)
+       OR (component_code = 'PPG' AND status_value = ?)
+       OR (component_code = 'GAUGE' AND status_value = ?)
+       OR (component_code = 'GNSS' AND status_value = ?)
+       OR (component_code = 'LTE' AND status_value = ?)
+  `;
+
+  const [rows] = await db.promise().query(sql, [
+    bleStatus,
+    imuStatus,
+    ppgStatus,
+    gaugeStatus,
+    gnssStatus,
+    lteStatus,
+  ]);
+
+  return rows;
+};
+
+const insertDeviceStatusLog = async (data) => {
+  const sql = `
+    INSERT INTO device_status_logs (
+      user_device_id,
+      event_type,
+      cycle_id,
+      packet_index,
+      ble_status,
+      imu_status,
+      ppg_status,
+      gauge_status,
+      gnss_status,
+      lte_status,
+      raw_byte_7,
+      raw_byte_8,
+      raw_byte_9,
+      raw_byte_10,
+      raw_byte_11,
+      raw_packet_hex,
+      recorded_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+
+  const [result] = await db.promise().query(sql, [
+    data.user_device_id,
+    data.eventType,
+    data.cycleId,
+    data.packetIndex,
+    data.bleStatus,
+    data.imuStatus,
+    data.ppgStatus,
+    data.gaugeStatus,
+    data.gnssStatus,
+    data.lteStatus,
+    data.byte7,
+    data.byte8,
+    data.byte9,
+    data.byte10,
+    data.byte11,
+    data.rawPacketHex,
+  ]);
+
+  return result;
+};
+
 
 module.exports = {
   getUserDeviceByDeviceId,
@@ -132,5 +231,8 @@ module.exports = {
   insertBatery,
   insertHeartRate,
   getAllSensorData,
-  getLatestSensorData
+  getLatestSensorData,
+  findActiveUserDeviceByMac,
+  findDeviceStatusDefinitions,
+  insertDeviceStatusLog
 };

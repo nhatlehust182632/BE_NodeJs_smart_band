@@ -13,21 +13,16 @@ const startMqttSubscriber = () => {
       }
     });
   });
-  mqttClient.on('message', (topic, message) => {
-    const data = Buffer.from(message.toString('hex'), 'hex');
-    sensorService.saveSensorData(data, (err, result) => {
-      if (err) {
-        console.error('MQTT HEX parse/save error:', err.message);
-        return;
-      }
+  mqttClient.on('message', async (topic, message) => {
+    try {
+      const data = Buffer.isBuffer(message)
+        ? message
+        : Buffer.from(message, 'hex');
 
-      if (result && result.saved) {
-        console.log('Saved to DB:', result.insertId);
-        return;
-      }
-
-      console.log('HEX packet parsed, DB not saved:', result && result.message);
-    });
+      await sensorService.saveSensorData(data);
+    } catch (error) {
+      console.error('[MQTT SENSOR ERROR]', error);
+    }
   });
 
   // mqttClient.on('message', (topic, message) => {

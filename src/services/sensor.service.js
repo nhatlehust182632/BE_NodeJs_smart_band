@@ -5,68 +5,6 @@ const locationService = require('../services/location.service');
 
 const axios = require("axios");
 
-// const handleType0Battery = async (eventType, message) => {
-//   if (eventType === 0 && message.length >= 10) {
-//     // Type 0: lưu % pin
-//     const battery_percent = message.readUInt16BE(8); // d1db9c18074900000032 => 0x0032 = 50
-
-//     // Lấy MAC từ 6 byte đầu
-//     const macBuffer = message.slice(0, 6);
-//     const macAddress = Array.from(macBuffer)
-//       .map((b) => b.toString(16).padStart(2, "0"))
-//       .join("");
-
-//     console.log("[TYPE0 BATTERY PACKET]", {
-//       rawHex: message.toString("hex"),
-//       macAddress,
-//       battery_percent,
-//     });
-
-//     // Tìm cả user_id và user_device_id theo MAC
-//     const [rows] = await db.promise().query(
-//       `
-//     SELECT 
-//       uad.user_id,
-//       ud.id AS user_device_id
-//     FROM user_active_devices uad
-//     LEFT JOIN user_devices ud
-//       ON ud.user_id = uad.user_id
-//       AND ud.device_id = uad.device_id
-//       AND ud.pairing_status = 1
-//     WHERE REPLACE(REPLACE(LOWER(uad.mac_address), ':', ''), '-', '') = ?
-//     LIMIT 1
-//     `,
-//       [macAddress]
-//     );
-
-//     // const deviceRow = rows && rows.length > 0 ? (Array.isArray(rows[0]) ? rows[0][0] : rows[0]) : null;
-//     const deviceRow = rows.length > 0 ? rows[0] : null;
-
-//     if (!deviceRow) {
-//       console.error("[TYPE0] Không tìm thấy user theo MAC:", macAddress);
-//       return;
-//     }
-
-//     const user_id = deviceRow.user_id;
-//     const user_device_id = deviceRow.user_device_id;
-
-//     if (!user_device_id) {
-//       console.error("[TYPE0] Không tìm thấy user_device_id theo MAC:", {
-//         macAddress,
-//         user_id,
-//       });
-//       return;
-//     }
-
-//     await deviceService.saveBatteryLogService({
-//       user_id,
-//       user_device_id,
-//       battery_percent,
-//       is_charging: 0,
-//     });
-//   }
-// };
-
 const handleType0Battery = async (eventType, message) => {
   if (eventType !== 0) {
     return;
@@ -156,51 +94,174 @@ const buildPlaceKeyFromCoords = (latitude, longitude) => {
   return `${Number(latitude).toFixed(3)}_${Number(longitude).toFixed(3)}`;
 };
 
-// const handleType3Location = async (eventType, message) => {
-//   console.log("[TYPE3 LOCATION PACKET]", {
-//     rawHex: message.toString("hex"),
-//   });
-//   if (eventType === 3 && message.length >= 16) {
-//     // Lấy latitude/longitude
-//     const latRaw = message.readInt32BE(8);
-//     const lngRaw = message.readInt32BE(12);
-//     const latitude = latRaw / 1e6;
-//     const longitude = lngRaw / 1e6;
+const handleType2DeviceStatus = async (eventType, message) => {
+  try {
+    if (
+      eventType !== 2 ||
+      !Buffer.isBuffer(message) ||
+      message.length < 11
+    ) {
+      console.error("[TYPE2 DEVICE STATUS ERROR]", {
+        reason: "Invalid Type 2 packet",
+        eventType,
+        isBuffer: Buffer.isBuffer(message),
+        messageLength: message?.length,
+        minimumLength: 11,
+        rawHex: Buffer.isBuffer(message) ? message.toString("hex") : null,
+      });
+      return;
+    }
 
-//     // Lấy MAC để tìm user_id
-//     const macBuffer = message.slice(0, 6);
-//     const macAddress = Array.from(macBuffer)
-//       .map(b => b.toString(16).padStart(2, '0'))
-//       .join('');
+    const macBuffer = message.slice(0, 6);
+    const macAddress = Array.from(macBuffer)
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
 
-//     const [userDeviceRows] = await db.promise().query(
-//       'SELECT user_id FROM user_active_devices WHERE REPLACE(REPLACE(LOWER(mac_address), ":", ""), "-", "") = ?',
-//       [macAddress]
-//     );
+    const byte7 = message[6];
+    const byte8 = message[7];
 
-//     if (!userDeviceRows || userDeviceRows.length === 0) {
-//       console.error('User device not found for MAC', macAddress);
-//       return;
-//     }
+    const decodedEventType = (byte7 >> 4) & 0x0f;
 
-//     // const userId = userDevice[0].user_id;
-//     const userId = userDeviceRows[0].user_id;
+    const cycleId =
+      ((byte7 & 0x0f) << 3) |
+      ((byte8 >> 5) & 0x07);
 
-//     // Gọi API service vị trí
-//     const place_key = buildPlaceKeyFromCoords(latitude, longitude);
-//     const place_name = await getPlaceNameFromCoords(latitude, longitude);
+    const packetIndex = byte8 & 0x1f;
 
-//     await locationService.saveLocationPlaceService({
-//       id: userId,
-//       latitude,
-//       longitude,
-//       place_key,
-//       place_name
-//     });
+    if (decodedEventType !== eventType) {
+      console.error("[TYPE2 DEVICE STATUS ERROR]", {
+        reason: "Decoded event type does not match argument",
+        eventType,
+        decodedEventType,
+        rawHex: message.toString("hex"),
+      });
+      return;
+    }
 
-//     console.log('[Type3] Location saved', latitude, longitude);
-//   }
-// };
+    const byte9 = message[8];
+    const byte10 = message[9];
+    const byte11 = message[10];
+
+    const bleStatus = (byte9 >> 4) & 0x0f;
+    const imuStatus = byte9 & 0x0f;
+
+    const ppgStatus = (byte10 >> 4) & 0x0f;
+    const gaugeStatus = byte10 & 0x0f;
+
+    const gnssStatus = (byte11 >> 4) & 0x0f;
+    const lteStatus = byte11 & 0x0f;
+
+    console.log("[TYPE2 DEVICE STATUS PACKET]", {
+      rawHex: message.toString("hex"),
+      messageLength: message.length,
+      macAddress,
+      byte7,
+      byte8,
+      eventType,
+      cycleId,
+      packetIndex,
+      byte9,
+      byte10,
+      byte11,
+      bleStatus,
+      imuStatus,
+      ppgStatus,
+      gaugeStatus,
+      gnssStatus,
+      lteStatus,
+    });
+
+    const deviceRow = await sensorRepository.findActiveUserDeviceByMac(
+      macAddress
+    );
+
+    if (!deviceRow || !deviceRow.user_device_id) {
+      console.error("[TYPE2 DEVICE STATUS ERROR]", {
+        reason: "Không tìm thấy user_device_id theo MAC",
+        macAddress,
+        user_id: deviceRow?.user_id,
+      });
+      return;
+    }
+
+    const expectedStatuses = [
+      { component_code: "BLE", status_value: bleStatus },
+      { component_code: "IMU", status_value: imuStatus },
+      { component_code: "PPG", status_value: ppgStatus },
+      { component_code: "GAUGE", status_value: gaugeStatus },
+      { component_code: "GNSS", status_value: gnssStatus },
+      { component_code: "LTE", status_value: lteStatus },
+    ];
+
+    const statusDefinitions =
+      await sensorRepository.findDeviceStatusDefinitions({
+        bleStatus,
+        imuStatus,
+        ppgStatus,
+        gaugeStatus,
+        gnssStatus,
+        lteStatus,
+      });
+
+    const definitionKeys = new Set(
+      statusDefinitions.map(
+        (row) => `${row.component_code}:${Number(row.status_value)}`
+      )
+    );
+
+    const invalidStatuses = expectedStatuses.filter(
+      (status) =>
+        !definitionKeys.has(
+          `${status.component_code}:${status.status_value}`
+        )
+    );
+
+    if (invalidStatuses.length > 0 || statusDefinitions.length !== 6) {
+      console.error("[TYPE2 DEVICE STATUS ERROR]", {
+        reason: "Trạng thái thiết bị không hợp lệ",
+        invalidStatuses,
+        statusDefinitions,
+      });
+      return;
+    }
+
+    const user_device_id = deviceRow.user_device_id;
+
+    await sensorRepository.insertDeviceStatusLog({
+      user_device_id,
+      eventType,
+      cycleId,
+      packetIndex,
+      bleStatus,
+      imuStatus,
+      ppgStatus,
+      gaugeStatus,
+      gnssStatus,
+      lteStatus,
+      byte7,
+      byte8,
+      byte9,
+      byte10,
+      byte11,
+      rawPacketHex: message.toString("hex"),
+    });
+
+    console.log("[TYPE2 DEVICE STATUS SAVED]", {
+      user_device_id,
+      eventType,
+      cycleId,
+      packetIndex,
+      bleStatus,
+      imuStatus,
+      ppgStatus,
+      gaugeStatus,
+      gnssStatus,
+      lteStatus,
+    });
+  } catch (error) {
+    console.error("[TYPE2 DEVICE STATUS ERROR]", error);
+  }
+};
 
 const handleType3Location = async (eventType, message) => {
   console.log("[TYPE3 LOCATION PACKET]", {
@@ -413,17 +474,15 @@ const saveSensorData = async (data, callback) => {
   const eventType = (data[6] >> 4) & 0x0F;
 
   if (eventType === 0) {
-    // xử lý pin
     await handleType0Battery(eventType, data);
+  } else if (eventType === 2) {
+    await handleType2DeviceStatus(eventType, data);
   } else if (eventType === 3) {
-    // xử lý vị trí
     await handleType3Location(eventType, data);
   } else {
-    console.log('Unknown type', eventType);
+    console.log("Unknown type", eventType);
   }
 };
-
-
 
 const fetchAllSensorData = (callback) => {
   sensorRepository.getAllSensorData(callback);
@@ -436,5 +495,6 @@ const fetchLatestSensorData = (callback) => {
 module.exports = {
   saveSensorData,
   fetchAllSensorData,
-  fetchLatestSensorData
+  fetchLatestSensorData,
+  handleType2DeviceStatus
 };
